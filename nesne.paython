@@ -1,0 +1,93 @@
+class Board:
+    """Oyunun tahtasını temsil eder."""
+    def _init_(self):
+        self.grid = [[" " for _ in range(3)] for _ in range(3)]
+
+    def display(self):
+        """Tahtayı ekrana yazdırır."""
+        for row in self.grid:
+            print("|".join(row))
+            print("-" * 5)
+
+    def update_cell(self, row, col, symbol):
+        """Belirtilen hücreye sembol ekler."""
+        if self.grid[row][col] == " ":
+            self.grid[row][col] = symbol
+            return True
+        else:
+            return False
+
+    def is_full(self):
+        """Tüm hücrelerin dolu olup olmadığını kontrol eder."""
+        return all(self.grid[i][j] != " " for i in range(3) for j in range(3))
+
+
+class Player:
+    """Oyuncuları temsil eder."""
+    def _init_(self, name, symbol):
+        self.name = name
+        self.symbol = symbol
+
+    def make_move(self, board):
+        """Oyuncudan hamle alır ve tahtayı günceller."""
+        while True:
+            try:
+                row = int(input(f"{self.name}, enter row (0-2): "))
+                col = int(input(f"{self.name}, enter column (0-2): "))
+                if row not in range(3) or col not in range(3):
+                    print("Invalid input! Row and column must be between 0 and 2.")
+                    continue
+                if board.update_cell(row, col, self.symbol):
+                    break
+                else:
+                    print("Cell is already taken!")
+            except ValueError:
+                print("Invalid input! Please enter numbers only.")
+
+
+class Game:
+    """Oyunun genel akışını kontrol eder."""
+    def _init_(self):
+        self.board = Board()
+        self.player1 = Player("Player 1", "X")
+        self.player2 = Player("Player 2", "O")
+        self.current_player = self.player1
+
+    def switch_player(self):
+        """Oyuncuyu değiştirir."""
+        self.current_player = self.player1 if self.current_player == self.player2 else self.player2
+
+    def check_winner(self):
+        """Kazananı kontrol eder."""
+        b = self.board.grid
+        # Rows, Columns, and Diagonals
+        for i in range(3):
+            if all(b[i][j] == self.current_player.symbol for j in range(3)) or \
+               all(b[j][i] == self.current_player.symbol for j in range(3)):
+                return True
+        if all(b[i][i] == self.current_player.symbol for i in range(3)) or \
+           all(b[i][2 - i] == self.current_player.symbol for i in range(3)):
+            return True
+        return False
+
+    def play(self):
+        """Oyunu başlatır."""
+        print("Welcome to Tic Tac Toe!")
+        while True:
+            self.board.display()
+            self.current_player.make_move(self.board)
+            if self.check_winner():
+                self.board.display()
+                print(f"Congratulations {self.current_player.name}, you win!")
+                break
+            if self.board.is_full():
+                self.board.display()
+                print("It's a draw!")
+                break
+            self.switch_player()
+
+
+# Oyunu Çalıştır
+if _name_ == "_main_":
+    game = Game()
+    game.play()
